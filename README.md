@@ -27,6 +27,12 @@ The code configures a four-pin motor driver for the DC motors. Additionally, it 
 ### Motor Adjustment
 - The code sets the direction (forward, reverse) and speed of each motor based on the sensor readings to ensure a specific path or alignment.
 
+## Usage
+
+To use this code:
+- Connect the LDRs to the specified analog pins (A0 to A3).
+- Connect the motor driver to the digital pins according to the defined pin configurations.
+- Upload this code to an Arduino board capable of analog and digital I/O.
 # Arduino Real-Time Clock (RTC) Control
 
 This Arduino sketch utilizes the `iarduino_RTC` library to control an external RTC module, specifically DS1302, DS1307, or DS3231, and triggers an action based on predefined time settings.
@@ -61,9 +67,3 @@ To use this code:
 - Upload this code to an Arduino board.
 
 The code, as written, demonstrates basic time-based control functionality. Modify the preset times (s, f, g, h) according to your requirements for activating specific events at designated times.
-## Usage
-
-To use this code:
-- Connect the LDRs to the specified analog pins (A0 to A3).
-- Connect the motor driver to the digital pins according to the defined pin configurations.
-- Upload this code to an Arduino board capable of analog and digital I/O.
