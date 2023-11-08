@@ -1,122 +1,65 @@
-
-#include <Servo.h>
-
-// horizontal servo
-Servo horizontal;
-int servoh = 90;
-
-int servohLimitHigh = 180;
-int servohLimitLow = 65;
-
-Servo vertical;
-int servov = 90;
-
-int servovLimitHigh = 120;
-int servovLimitLow = 15;
-
-
-// LDR pin connections
-int ldrTR = 0; // LDR top right
-int ldrTL = 1; // LDR top left
-int ldrBR = 2; // LDR bottom right
-int ldrBL = 3; // LDR bottom left
-
-
+// Пины для управления моторами DC
+const int motorXPin1 = 8; // Подключение пина 8 к IN1 на драйвере
+const int motorXPin2 = 7; // Подключение пина 7 к IN2 на драйвере
+const int motorYPin1 = 12; // Подключение пина 12 к IN3 на драйвере
+const int motorYPin2 = 11; // Подключение пина 11 к IN4 на драйвере
+// Пины для управления скоростью моторов
+const int ENA = 9; // Пин управления скоростью мотора X
+const int ENB = 10; // Пин управления скоростью мотора Y
+// Переменные для хранения текущих координат
+int xPos = 0;
+int yPos = 0;
 void setup() {
-  Serial.begin(9600);
-  // servo connections
-  horizontal.attach(5);
-  vertical.attach(6);
-  // move servos
-  horizontal.write(90);
-  vertical.write(45);
-  delay(3000);
+// Инициализация пинов для управления моторами DC
+pinMode(motorXPin1, OUTPUT);
+pinMode(motorXPin2, OUTPUT);
+pinMode(motorYPin1, OUTPUT);
+pinMode(motorYPin2, OUTPUT);
+// Инициализация пинов для управления скоростью моторов
+pinMode(ENA, OUTPUT);
+pinMode(ENB, OUTPUT);
 }
-
-
 void loop() {
-
-  int tr = analogRead(ldrTR); // top right
-  int tl = analogRead(ldrTL); // top left
-  int br = analogRead(ldrBR); // bottom right
-  int bl = analogRead(ldrBL); // bottom left
-
-  int dtime = 0; // change for debugging only
-  int tol = 50;
-
-  int avt = (tl + tr) / 2; // average value top
-  int avd = (bl + br) / 2; // average value bottom
-  int avl = (tl + bl) / 2; // average value left
-  int avr = (tr + br) / 2; // average value right
-
-  int dvert = avt - avd;  // check the difference of up and down
-  int dhoriz = avl - avr; // check the difference of left and right
-
-
-  // send data to the serial monitor if desired
-  Serial.print(tl);
-  Serial.print(" ");
-  Serial.print(tr);
-  Serial.print(" ");
-  Serial.print(bl);
-  Serial.print(" ");
-  Serial.print(br);
-  Serial.print("  ");
-  Serial.print(avt);
-  Serial.print(" ");
-  Serial.print(avd);
-  Serial.print(" ");
-  Serial.print(avl);
-  Serial.print(" ");
-  Serial.print(avr);
-  Serial.print("  ");
-  Serial.print(dtime);
-  Serial.print("   ");
-  Serial.print(tol);
-  Serial.print("  ");
-  Serial.print(servov);
-  Serial.print("   ");
-  Serial.print(servoh);
-  Serial.println(" ");
-
-
-  // check if the difference is in the tolerance else change vertical angle
-  if (-1 * tol > dvert || dvert > tol) {
-    if (avt > avd) {
-      servov = ++servov;
-      if (servov > servovLimitHigh) {
-        servov = servovLimitHigh;
-      }
-    }
-    else if (avt < avd) {
-      servov = --servov;
-      if (servov < servovLimitLow) {
-        servov = servovLimitLow;
-      }
-    }
-    vertical.write(servov);
-  }
-
-  // check if the difference is in the tolerance else change horizontal angle
-  if (-1 * tol > dhoriz || dhoriz > tol) {
-    if (avl > avr) {
-      servoh = --servoh;
-      if (servoh < servohLimitLow) {
-        servoh = servohLimitLow;
-      }
-    }
-    else if (avl < avr) {
-      servoh = ++servoh;
-      if (servoh > servohLimitHigh) {
-        servoh = servohLimitHigh;
-      }
-    }
-    else if (avl = avr) {
-      // nothing
-    }
-    horizontal.write(servoh);
-  }
-  
-  delay(dtime);
-  
+// Считывание значений с фоторезисторов
+int tl = analogRead(A0);
+int tr = analogRead(A1);
+int bl = analogRead(A2);
+int br = analogRead(A3);
+// Вычисление средних значений и разницы между значениями LDR
+int avgX1 = (tl + tr) / 2; // Среднее значение между tl и tr
+int avgX2 = (bl + br) / 2; // Среднее значение между bl и br
+int avgY1 = (tr + br) / 2; // Среднее значение между tr и br
+int avgY2 = (tl + bl) / 2; // Среднее значение между tl и bl
+int diffX = abs(avgX1 - avgX2); // Разница между avgX1 и avgX2
+int diffY = abs(avgY1 - avgY2); // Разница между avgY1 и avgY2
+// Управление мотором X
+if (diffX > 2) {
+if (avgX1 > avgX2) {
+digitalWrite(motorXPin1, HIGH);
+digitalWrite(motorXPin2, LOW);
+analogWrite(ENA, 255);
+} else {
+digitalWrite(motorXPin1, LOW);
+digitalWrite(motorXPin2, HIGH);
+analogWrite(ENA, 255);
 }
+} else {
+digitalWrite(motorXPin1, LOW);
+digitalWrite(motorXPin2, LOW);
+}
+// Управление мотором Y
+if (diffY > 2) {
+if (avgY1 > avgY2) {
+digitalWrite(motorYPin1, HIGH);
+digitalWrite(motorYPin2, LOW);
+analogWrite(ENB, 255);
+} else {
+digitalWrite(motorYPin1, LOW);
+digitalWrite(motorYPin2, HIGH);
+analogWrite(ENB, 255);
+}
+} else {
+digitalWrite(motorYPin1, LOW);
+digitalWrite(motorYPin2, LOW);
+}
+}   
